@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
@@ -23,6 +24,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.app.service.customer.entities.Employee;
+
+import jakarta.validation.ConstraintViolation;
 
 /**
  * generates an error log file. writes validation errors for each column of
@@ -92,6 +97,62 @@ public class ErrorLogService {
 	}
 
 	/**
+	 * generates the error log file for invalid employee rows present in csv file
+	 * 
+	 * @param empErrorRows
+	 */
+	@Async
+	public void generateEmployeeErrorLogFile(Map<Integer, Set<ConstraintViolation<Employee>>> empErrorRows) {
+		logger.info("ErrorLogService :: generateEmployeeErrorLogFile - {}",
+				"Generating error log file of employees started");
+		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+			XSSFSheet xssfSheet = workbook.createSheet();
+			XSSFFont font = workbook.createFont();
+			font.setBold(true);
+			XSSFCellStyle cellStyle = workbook.createCellStyle();
+			cellStyle.setFont(font);
+			cellStyle.setFillBackgroundColor(HSSFColorPredefined.BLACK.getIndex());
+			int rowNum = 0;
+			List<Integer> rowList = empErrorRows.keySet().stream().collect(Collectors.toList());
+			XSSFRow xssfRow = xssfSheet.createRow(rowNum++);
+			XSSFCell cell1 = xssfRow.createCell(0);
+			cell1.setCellValue("ROW NUMBER");
+			cell1.setCellStyle(cellStyle);
+			XSSFCell cell2 = xssfRow.createCell(1);
+			cell2.setCellValue("ERROR COLUMN");
+			cell2.setCellStyle(cellStyle);
+			XSSFCell cell3 = xssfRow.createCell(2);
+			cell3.setCellValue("ERROR DESCRIPTION");
+			cell3.setCellStyle(cellStyle);
+			for (int i = 0; i < rowList.size(); i++) {
+				synchronized (xssfSheet) {
+					rowNum = addRowsInEmpErrorLogFile(xssfSheet, rowNum++, rowList.get(i),
+							empErrorRows.get(rowList.get(i)), cellStyle);
+				}
+			}
+			Path path = Paths.get(errorLogFilePath + LocalDateTime.now() + fileFormat);
+			try {
+				File file = path.toFile();
+				file.setReadable(true);
+				FileOutputStream out = new FileOutputStream(file);
+				workbook.write(out);
+				out.close();
+			} catch (FileNotFoundException e) {
+				logger.error(
+						"ErrorLogService :: generateErrorLogExcelFile, FileNotFoundException occured while generating error log file - {}",
+						e.getMessage());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error(
+					"ErrorLogService :: generateEmployeeErrorLogFile, IOException occured while generating error log file - {}",
+					e.getMessage());
+		}
+		logger.info("ErrorLogService :: generateEmployeeErrorLogFile - {}",
+				"Generating error log file of employees completed");
+	}
+
+	/**
 	 * Adds errors related to a csv record to excel sheet
 	 * 
 	 * @param xssfSheet
@@ -109,6 +170,17 @@ public class ErrorLogService {
 			hssfRow.createCell(0).setCellValue("Row " + rowNum);
 			hssfRow.createCell(1).setCellValue(errorColumnNames.get(i));
 			hssfRow.createCell(2).setCellValue(errorColumns.get(errorColumnNames.get(i)));
+		}
+		return rowCount;
+	}
+
+	public int addRowsInEmpErrorLogFile(XSSFSheet xssfSheet, int rowCount, int rowNum,
+			Set<ConstraintViolation<Employee>> errors, XSSFCellStyle cellStyle) {
+		for (ConstraintViolation<Employee> constraint : errors) {
+			XSSFRow hssfRow = xssfSheet.createRow(rowCount++);
+			hssfRow.createCell(0).setCellValue("Row " + rowNum);
+			hssfRow.createCell(1).setCellValue(constraint.getPropertyPath().toString());
+			hssfRow.createCell(2).setCellValue(constraint.getMessage());
 		}
 		return rowCount;
 	}

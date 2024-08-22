@@ -101,7 +101,6 @@ public class CustomerServiceTest {
 		InputStream inputStream = new FileInputStream(file);
 		Map<String, String> errors = new HashMap<>();
 		errors.put(CustomerCSVFileHeaders.Duplicate.name(), "duplicate customer record");
-		// doReturn(customer).when(customerService).convertcustomerDtoToObj(any());
 		when(customerFieldsValidator.validateCustomerDto(any())).thenReturn(CompletableFuture.completedFuture(errors));
 		assertFalse(customerService.uploadCustomerInfo(inputStream));
 	}

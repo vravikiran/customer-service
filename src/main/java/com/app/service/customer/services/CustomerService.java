@@ -29,10 +29,10 @@ import com.app.service.customer.entities.CustomerDto;
 import com.app.service.customer.enums.CustomerCSVFileHeaders;
 import com.app.service.customer.repositories.BrandRepository;
 import com.app.service.customer.repositories.CustomerRepository;
-import java.util.concurrent.CompletableFuture;
 
 /**
- * Reads the contents of uploaded csv file and converts the csv records into customerDtos
+ * Reads the contents of uploaded csv file and converts the csv records into
+ * customerDtos
  */
 @Service
 public class CustomerService {
@@ -50,10 +50,11 @@ public class CustomerService {
 
 	/**
 	 * Reads the rows of csv file and converts them to customerDtos
+	 * 
 	 * @param in
 	 * @throws Exception
 	 */
-	public boolean uploadCustomerInfo(InputStream in) throws EmptyFileException,IOException {
+	public boolean uploadCustomerInfo(InputStream in) throws EmptyFileException, IOException {
 		List<CustomerDto> customerDtos = null;
 		boolean isAllValid = false;
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
@@ -63,18 +64,21 @@ public class CustomerService {
 			List<CSVRecord> csvRecords = csvParser.getRecords();
 			if (csvRecords.isEmpty()) {
 				throw new EmptyFileException();
+			} else {
+				customerDtos = csvRecords.stream().map(customer -> convertCsvRecordToCustomerRecord(customer))
+						.collect(Collectors.toList());
+				isAllValid = validateListOfCustomers(customerDtos);
 			}
-			customerDtos = csvRecords.stream().map(customer -> convertCsvRecordToCustomerRecord(customer))
-					.collect(Collectors.toList());
-			isAllValid = validateListOfCustomers(customerDtos);
 		} catch (InterruptedException | ExecutionException e) {
-			logger.error("Exception occured while validating customers","CustomerService :: uploadCustomerInfo - {}",e.getMessage());
+			logger.error("Exception occured while validating customers", "CustomerService :: uploadCustomerInfo - {}",
+					e.getMessage());
 		}
 		return isAllValid;
 	}
 
 	/**
 	 * converts csvRecord to CustomerDto
+	 * 
 	 * @param csvRecord
 	 * @return
 	 */
@@ -115,10 +119,11 @@ public class CustomerService {
 	}
 
 	/**
-	 * validates the list of customerDtos and returns a map of errors
-	 * if there are no errors saves all the records into database
-	 * writes the errors associated with the records into a log file
-	 * valid records are persisted into database, invalid records are written to error log file
+	 * validates the list of customerDtos and returns a map of errors if there are
+	 * no errors saves all the records into database writes the errors associated
+	 * with the records into a log file valid records are persisted into database,
+	 * invalid records are written to error log file
+	 * 
 	 * @param customerDtos
 	 * @return
 	 * @throws InterruptedException
@@ -126,7 +131,7 @@ public class CustomerService {
 	 */
 	public boolean validateListOfCustomers(List<CustomerDto> customerDtos)
 			throws InterruptedException, ExecutionException {
-		logger.info("CustomerService:: validateListOfCustomers - {}","validating uploaded customer data started");
+		logger.info("CustomerService:: validateListOfCustomers - {}", "validating uploaded customer data started");
 		boolean isValid = false;
 		Map<Integer, Map<String, String>> errorsMap = new HashMap<>();
 		Set<CustomerDto> validCustomerDtos = new HashSet<>();
@@ -139,7 +144,9 @@ public class CustomerService {
 					if (!validCustomerDtos.contains(customerDto)) {
 						validCustomerDtos.add(customerDto);
 					} else {
-						logger.error("CustomerService :: validateListOfCustomers,duplicate customer row in csv row - {}",customerDto.getSlNo());
+						logger.error(
+								"CustomerService :: validateListOfCustomers,duplicate customer row in csv row - {}",
+								customerDto.getSlNo());
 						errors.put(CustomerCSVFileHeaders.Duplicate.name(), "duplicate customer record");
 						errorsMap.put(customerDto.getSlNo(), errors);
 					}
@@ -158,32 +165,35 @@ public class CustomerService {
 		if (!validCustomerDtos.isEmpty()) {
 			saveCustomerDtos(validCustomerDtos);
 		}
-		logger.info("CustomerService:: validateListOfCustomers - {}","validating uploaded customer data completed");
+		logger.info("CustomerService:: validateListOfCustomers - {}", "validating uploaded customer data completed");
 		return isValid;
 	}
 
 	/**
 	 * Saves the customer records to database
+	 * 
 	 * @param customerDtos
 	 */
 	@Async
 	public void saveCustomerDtos(Set<CustomerDto> customerDtos) {
-		logger.info("CustomerService:: saveCustomerDtos - {}","persiting customers started");
+		logger.info("CustomerService:: saveCustomerDtos - {}", "persiting customers started");
 		List<CustomerDto> parentCustomerDtos = customerDtos.stream().filter(
-				customerDto -> ((customerDto.getParentCompany() != null && customerDto.getParentCompany().isBlank()) || customerDto.getParentCompany() == null))
+				customerDto -> ((customerDto.getParentCompany() != null && customerDto.getParentCompany().isBlank())
+						|| customerDto.getParentCompany() == null))
 				.collect(Collectors.toList());
 		customerDtos.removeAll(parentCustomerDtos);
 		List<Customer> parentCustomers = parentCustomerDtos.parallelStream()
 				.map(customerDto -> convertcustomerDtoToObj(customerDto)).collect(Collectors.toList());
 		customerRepository.saveAll(parentCustomers);
-		List<Customer> childCustomers = customerDtos.parallelStream().map(customerDto -> convertcustomerDtoToObj(customerDto))
-				.collect(Collectors.toList());
+		List<Customer> childCustomers = customerDtos.parallelStream()
+				.map(customerDto -> convertcustomerDtoToObj(customerDto)).collect(Collectors.toList());
 		customerRepository.saveAll(childCustomers);
-		logger.info("CustomerService:: saveCustomerDtos - {}","persiting customers completed");
+		logger.info("CustomerService:: saveCustomerDtos - {}", "persiting customers completed");
 	}
 
 	/**
 	 * converts CustomerDto to Customer object
+	 * 
 	 * @param customerDto
 	 * @return
 	 */
@@ -198,8 +208,8 @@ public class CustomerService {
 		customer.setCustomercode(customerDto.getCustomerCode());
 		customer.setCustomertypefk(dbConfig.getCustomerTypes().get(customerDto.getCustomerType().toUpperCase()));
 		customer.setCustomername(customerDto.getCustomerName());
-		if(!customerDto.getDataImportFk().equals("0")) {
-		customer.setDataimportfk(UUID.fromString(customerDto.getDataImportFk()));
+		if (!customerDto.getDataImportFk().equals("0")) {
+			customer.setDataimportfk(UUID.fromString(customerDto.getDataImportFk()));
 		}
 		customer.setBrandfk(brandRepository.fetchByBrandName(customerDto.getBrand()));
 		customer.setIstaxexempt(customerDto.isTaxExempt());
