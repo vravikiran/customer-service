@@ -86,7 +86,6 @@ public class EmployeeService {
 			}
 			if (!empErrorRows.isEmpty()) {
 				isValid = false;
-				System.out.println("after invalid");
 				errorLogService.generateEmployeeErrorLogFile(empErrorRows);
 			}
 			saveEmployees(validEmployees);

@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +32,8 @@ import com.app.service.customer.services.ErrorLogService;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.util.List;
+import java.util.ArrayList;
 
 @ExtendWith(MockitoExtension.class)
 public class EmployeeServiceTest {
@@ -54,7 +59,7 @@ public class EmployeeServiceTest {
 		doReturn(empErrorRows).when(validator).validate(any());
 		assertTrue(employeeService.uploadEmployeesInfo(inputStream));
 	}
-	
+
 	@Test
 	public void testUploadEmployeesInfo_WithInValidData() throws IOException {
 		Set<ConstraintViolation<Employee>> empErrorRows = new HashSet<>();
@@ -70,6 +75,18 @@ public class EmployeeServiceTest {
 		File file = new File("./src/test/resources/emptydata.csv");
 		InputStream inputStream = new FileInputStream(file);
 		assertThrows(EmptyFileException.class, () -> employeeService.uploadEmployeesInfo(inputStream));
+	}
+
+	@Test
+	public void testSaveEmployees() {
+		employeeService.saveEmployees(getEmpList());
+		verify(employeeRepository, times(1)).saveAll(anyList());
+	}
+
+	public List<Employee> getEmpList() {
+		List<Employee> employees = new ArrayList<>();
+		employees.add(new Employee());
+		return employees;
 	}
 
 }

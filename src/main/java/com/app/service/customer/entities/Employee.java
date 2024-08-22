@@ -19,7 +19,7 @@ public class Employee {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID customeremppk;
-	@NotNull
+	@NotNull(message="Invalid customer")
 	private UUID customerfk;
 	private String designation;
 	private String empname;
