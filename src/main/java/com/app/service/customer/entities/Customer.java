@@ -11,7 +11,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Customer {
+public class Customer extends PatchableObject {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID customerpk;

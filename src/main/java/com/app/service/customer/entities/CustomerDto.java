@@ -1,6 +1,7 @@
 package com.app.service.customer.entities;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import com.app.service.customer.validators.IsValidCreditStatus;
 import com.app.service.customer.validators.IsValidCustomerType;
@@ -9,6 +10,7 @@ import com.app.service.customer.validators.IsValidGstnType;
 import com.app.service.customer.validators.IsValidPhoneNumber;
 import com.app.service.customer.validators.IsValidRatingType;
 import com.app.service.customer.validators.IsValidState;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -19,10 +21,12 @@ import jakarta.validation.constraints.Size;
  * DTO POJO for customer
  */
 
-public class CustomerDto {
+public class CustomerDto extends PatchableObject {
+	private UUID customerpk;
+	@JsonIgnore
 	private int slNo;
 	private String parentCompany;
-	private String dataImportFk;
+	private UUID dataimportfk;
 	@NotBlank(message = "customer type cannot be blank")
 	@IsValidCustomerType(message = "Invalid Customer Type")
 	private String customerType;
@@ -35,7 +39,7 @@ public class CustomerDto {
 	@NotBlank
 	@Size(max = 200, message = "Customer alias length is more than 200 characters")
 	private String customerAlias;
-	@NotBlank(message = "brand cannot be null")
+	@NotBlank(message = "brand cannot be blank")
 	private String brand;
 	@NotBlank(message = "Supply state cannot be blank")
 	@IsValidState(message = "Invalid supply state")
@@ -43,7 +47,7 @@ public class CustomerDto {
 	@NotBlank(message = "GST Type cannot be blank")
 	@IsValidGstnType(message = "Invalid Gstn Type")
 	private String gstType;
-	private boolean isTaxExempt;
+	private boolean isTaxexempt;
 	@NotBlank(message = "Greeting cannot be blank")
 	@IsValidGreetingType(message = "Invalid Greeting Type")
 	private String greeting;
@@ -53,21 +57,23 @@ public class CustomerDto {
 	@NotBlank(message = "Rating cannot be blank")
 	@IsValidRatingType(message = "Invalid Rating Type")
 	private String rating;
-	private boolean allowDuplicateGSTIN;
+	private boolean allowDuplicateGSTIN = false;
 	private String customerGstIn;
 	private String supplyGstIn;
 	@IsValidPhoneNumber(message = "Invalid Phone Number")
-	private long phoneNo;
+	private long phoneno;
 	@IsValidPhoneNumber(message = "Invalid Mobile Number")
-	private long mobileNo;
+	private long mobileno;
 	@IsValidPhoneNumber(message = "Invalid Fax Number")
-	private long faxNumber;
+	private long faxnumber;
 	@NotBlank(message = "Email cannot be blank")
 	@Email
 	private String email;
+	@NotBlank(message = "Website cannot be blank")
 	private String website;
-	private String tanNo;
-	private String panNo;
+	private String tanno;
+	private String panno;
+	private boolean isactive = true;
 
 	public int getSlNo() {
 		return slNo;
@@ -83,14 +89,6 @@ public class CustomerDto {
 
 	public void setParentCompany(String parentCompany) {
 		this.parentCompany = parentCompany;
-	}
-
-	public String getDataImportFk() {
-		return dataImportFk;
-	}
-
-	public void setDataImportFk(String dataImportFk) {
-		this.dataImportFk = dataImportFk;
 	}
 
 	public String getCustomerType() {
@@ -149,12 +147,13 @@ public class CustomerDto {
 		this.gstType = gstType;
 	}
 
-	public boolean isTaxExempt() {
-		return isTaxExempt;
+
+	public boolean isTaxexempt() {
+		return isTaxexempt;
 	}
 
-	public void setTaxExempt(boolean isTaxExempt) {
-		this.isTaxExempt = isTaxExempt;
+	public void setTaxexempt(boolean isTaxexempt) {
+		this.isTaxexempt = isTaxexempt;
 	}
 
 	public String getGreeting() {
@@ -205,30 +204,6 @@ public class CustomerDto {
 		this.supplyGstIn = supplyGstIn;
 	}
 
-	public long getPhoneNo() {
-		return phoneNo;
-	}
-
-	public void setPhoneNo(long phoneNo) {
-		this.phoneNo = phoneNo;
-	}
-
-	public long getMobileNo() {
-		return mobileNo;
-	}
-
-	public void setMobileNo(long mobileNo) {
-		this.mobileNo = mobileNo;
-	}
-
-	public long getFaxNumber() {
-		return faxNumber;
-	}
-
-	public void setFaxNumber(long faxNumber) {
-		this.faxNumber = faxNumber;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -245,37 +220,89 @@ public class CustomerDto {
 		this.website = website;
 	}
 
-	public String getTanNo() {
-		return tanNo;
+	public boolean isIsactive() {
+		return isactive;
 	}
 
-	public void setTanNo(String tanNo) {
-		this.tanNo = tanNo;
+	public void setIsactive(boolean isactive) {
+		this.isactive = isactive;
 	}
 
-	public String getPanNo() {
-		return panNo;
+	public UUID getCustomerpk() {
+		return customerpk;
 	}
 
-	public void setPanNo(String panNo) {
-		this.panNo = panNo;
+	public void setCustomerpk(UUID customerpk) {
+		this.customerpk = customerpk;
+	}
+
+	public UUID getDataimportfk() {
+		return dataimportfk;
+	}
+
+	public void setDataimportfk(UUID dataimportfk) {
+		this.dataimportfk = dataimportfk;
+	}
+
+	public long getPhoneno() {
+		return phoneno;
+	}
+
+	public void setPhoneno(long phoneno) {
+		this.phoneno = phoneno;
+	}
+
+	public long getMobileno() {
+		return mobileno;
+	}
+
+	public void setMobileno(long mobileno) {
+		this.mobileno = mobileno;
+	}
+
+	public long getFaxnumber() {
+		return faxnumber;
+	}
+
+	public void setFaxnumber(long faxnumber) {
+		this.faxnumber = faxnumber;
+	}
+
+	public String getTanno() {
+		return tanno;
+	}
+
+	public void setTanno(String tanno) {
+		this.tanno = tanno;
+	}
+
+	public String getPanno() {
+		return panno;
+	}
+
+	public void setPanno(String panno) {
+		this.panno = panno;
 	}
 
 	@Override
 	public String toString() {
-		return "CustomerDto [sNo=" + slNo + ", parentCompany=" + parentCompany + ", dataImportFk=" + dataImportFk
-				+ ", customerType=" + customerType + ", customerCode=" + customerCode + ", customerName=" + customerName
-				+ ", customerAlias=" + customerAlias + ", brand=" + brand + ", supplyState=" + supplyState
-				+ ", gstType=" + gstType + ", isTaxExempt=" + isTaxExempt + ", greeting=" + greeting + ", creditStatus="
-				+ creditStatus + ", rating=" + rating + ", allowDuplicateGSTIN=" + allowDuplicateGSTIN
-				+ ", customerGstIn=" + customerGstIn + ", supplyGstIn=" + supplyGstIn + ", phoneNo=" + phoneNo
-				+ ", mobileNo=" + mobileNo + ", faxNumber=" + faxNumber + ", email=" + email + ", website=" + website
-				+ ", tanNo=" + tanNo + ", panNo=" + panNo + "]";
+		return "CustomerDto [customerpk=" + customerpk + ", slNo=" + slNo + ", parentCompany=" + parentCompany
+				+ ", dataimportfk=" + dataimportfk + ", customerType=" + customerType + ", customerCode=" + customerCode
+				+ ", customerName=" + customerName + ", customerAlias=" + customerAlias + ", brand=" + brand
+				+ ", supplyState=" + supplyState + ", gstType=" + gstType + ", istaxexempt=" + isTaxexempt
+				+ ", greeting=" + greeting + ", creditStatus=" + creditStatus + ", rating=" + rating
+				+ ", allowDuplicateGSTIN=" + allowDuplicateGSTIN + ", customerGstIn=" + customerGstIn + ", supplyGstIn="
+				+ supplyGstIn + ", phoneno=" + phoneno + ", mobileno=" + mobileno + ", faxnumber=" + faxnumber
+				+ ", email=" + email + ", website=" + website + ", tanno=" + tanno + ", panno=" + panno + ", isactive="
+				+ isactive + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(customerAlias, customerCode, customerName);
+		return Objects.hash(allowDuplicateGSTIN, brand, creditStatus, customerAlias, customerCode, customerGstIn,
+				customerName, customerType, customerpk, dataimportfk, email, faxnumber, greeting, gstType, isTaxexempt,
+				isactive, mobileno, panno, parentCompany, phoneno, rating, slNo, supplyGstIn, supplyState, tanno,
+				website);
 	}
 
 	@Override
@@ -287,8 +314,23 @@ public class CustomerDto {
 		if (getClass() != obj.getClass())
 			return false;
 		CustomerDto other = (CustomerDto) obj;
-		return Objects.equals(customerAlias, other.customerAlias) || Objects.equals(customerCode, other.customerCode)
-				|| Objects.equals(customerName, other.customerName);
+		return allowDuplicateGSTIN == other.allowDuplicateGSTIN && Objects.equals(brand, other.brand)
+				&& Objects.equals(creditStatus, other.creditStatus)
+				&& Objects.equals(customerAlias, other.customerAlias)
+				&& Objects.equals(customerCode, other.customerCode)
+				&& Objects.equals(customerGstIn, other.customerGstIn)
+				&& Objects.equals(customerName, other.customerName) && Objects.equals(customerType, other.customerType)
+				&& Objects.equals(customerpk, other.customerpk) && Objects.equals(dataimportfk, other.dataimportfk)
+				&& Objects.equals(email, other.email) && faxnumber == other.faxnumber
+				&& Objects.equals(greeting, other.greeting) && Objects.equals(gstType, other.gstType)
+				&& isTaxexempt == other.isTaxexempt && isactive == other.isactive && mobileno == other.mobileno
+				&& Objects.equals(panno, other.panno) && Objects.equals(parentCompany, other.parentCompany)
+				&& phoneno == other.phoneno && Objects.equals(rating, other.rating) && slNo == other.slNo
+				&& Objects.equals(supplyGstIn, other.supplyGstIn) && Objects.equals(supplyState, other.supplyState)
+				&& Objects.equals(tanno, other.tanno) && Objects.equals(website, other.website);
 	}
 
+	public CustomerDto() {
+		super();
+	}
 }

@@ -19,7 +19,7 @@ public class Customertype {
 	}
 
 	public String getBizcontacttypedesc() {
-		return bizcontacttypedesc;
+		return bizcontacttypedesc.toUpperCase();
 	}
 
 	@Override

@@ -27,7 +27,7 @@ public class State {
 		this.statecode = statecode;
 	}
 	public String getStatename() {
-		return statename;
+		return statename.toUpperCase();
 	}
 	public void setStatename(String statename) {
 		this.statename = statename;

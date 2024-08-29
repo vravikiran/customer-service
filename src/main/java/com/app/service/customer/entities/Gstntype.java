@@ -25,7 +25,7 @@ public class Gstntype {
 	}
 
 	public String getGsttypedesc() {
-		return gsttypedesc;
+		return gsttypedesc.toUpperCase();
 	}
 
 	public void setGsttypedesc(String gsttypedesc) {

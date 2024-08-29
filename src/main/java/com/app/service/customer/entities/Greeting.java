@@ -24,7 +24,7 @@ public class Greeting {
 	}
 
 	public String getGreetingcode() {
-		return greetingcode;
+		return greetingcode.toUpperCase();
 	}
 
 	public void setGreetingcode(String greetingcode) {
@@ -32,7 +32,7 @@ public class Greeting {
 	}
 
 	public String getGreetingdesc() {
-		return greetingdesc;
+		return greetingdesc.toUpperCase();
 	}
 
 	public void setGreetingdesc(String greetingdesc) {

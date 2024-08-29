@@ -16,6 +16,6 @@ public class CreditStatusValidator implements ConstraintValidator<IsValidCreditS
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return dbConfig.getCreditStatuses().containsKey(value.toUpperCase());
+		return (value != null && dbConfig.getCreditStatuses().containsKey(value.toUpperCase())) ? true:false;
 	}
 }

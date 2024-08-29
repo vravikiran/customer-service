@@ -45,18 +45,15 @@ public class CustomerFieldsByNameServiceTest {
 
 	@Test
 	public void testGetGSTINAndPANDetails_WithInValidData() throws InterruptedException, ExecutionException {
-		when(customerRepository.getGSTINAndPANDetails(anyString(), anyString(), anyString(), anyString()))
-				.thenReturn(null);
-		assertNull(customerFieldsByNameService.getGSTINAndPANDetails(anyString(), anyString(), anyString(), anyString())
-				.get());
+		when(customerRepository.getGSTINAndPANDetails(anyString(), anyString(), anyString())).thenReturn(null);
+		assertNull(customerFieldsByNameService.getGSTINAndPANDetails(anyString(), anyString(), anyString()).get());
 	}
 
 	@Test
 	public void testGetGSTINAndPANDetails_WithValidData() throws InterruptedException, ExecutionException {
-		when(customerRepository.getGSTINAndPANDetails(anyString(), anyString(), anyString(), anyString()))
+		when(customerRepository.getGSTINAndPANDetails(anyString(), anyString(), anyString()))
 				.thenReturn(gstinAndPanDto);
-		assertNotNull(customerFieldsByNameService
-				.getGSTINAndPANDetails(anyString(), anyString(), anyString(), anyString()).get());
+		assertNotNull(customerFieldsByNameService.getGSTINAndPANDetails(anyString(), anyString(), anyString()).get());
 	}
 
 	@Test
@@ -65,7 +62,7 @@ public class CustomerFieldsByNameServiceTest {
 		when(customerRepository.getParentCustomerId(anyString())).thenReturn(uuid);
 		assertNotNull(customerFieldsByNameService.fetchParentCustomerId(anyString()).get());
 	}
-	
+
 	@Test
 	public void testFetchParentCustomerId_WithInValidVal() throws InterruptedException, ExecutionException {
 		when(customerRepository.getParentCustomerId(anyString())).thenReturn(null);

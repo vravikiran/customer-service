@@ -19,7 +19,7 @@ public class Rating {
 	}
 
 	public String getRating() {
-		return rating;
+		return rating.toUpperCase();
 	}
 
 	@Override

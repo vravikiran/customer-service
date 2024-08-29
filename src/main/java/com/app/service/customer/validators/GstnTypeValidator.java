@@ -6,6 +6,7 @@ import com.app.service.customer.config.DBConfig;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 /**
  * Checks given GSTNType is valid
  */
@@ -15,6 +16,6 @@ public class GstnTypeValidator implements ConstraintValidator<IsValidGstnType, S
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return dbConfig.getGstnTypes().containsKey(value.toUpperCase());
+		return (value != null && dbConfig.getGstnTypes().containsKey(value.toUpperCase())) ? true : false;
 	}
 }

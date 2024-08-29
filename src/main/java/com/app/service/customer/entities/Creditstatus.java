@@ -21,7 +21,7 @@ public class Creditstatus {
 	}
 
 	public String getCreditstatus() {
-		return creditstatus;
+		return creditstatus.toUpperCase();
 	}
 
 	public void setCreditstatus(String creditstatus) {

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -24,11 +26,18 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.app.service.customer.config.DBConfig;
+import com.app.service.customer.entities.Brand;
 import com.app.service.customer.entities.Customer;
 import com.app.service.customer.entities.CustomerDto;
 import com.app.service.customer.enums.CustomerCSVFileHeaders;
+import com.app.service.customer.enums.GSTNTypeEnum;
+import com.app.service.customer.exceptions.EmptyDataException;
 import com.app.service.customer.repositories.BrandRepository;
 import com.app.service.customer.repositories.CustomerRepository;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 
 /**
  * Reads the contents of uploaded csv file and converts the csv records into
@@ -47,6 +56,8 @@ public class CustomerService {
 	DBConfig dbConfig;
 	@Autowired
 	BrandRepository brandRepository;
+	@Autowired
+	private Validator validator;
 
 	/**
 	 * Reads the rows of csv file and converts them to customerDtos
@@ -84,37 +95,41 @@ public class CustomerService {
 	 */
 	private CustomerDto convertCsvRecordToCustomerRecord(CSVRecord csvRecord) {
 		CustomerDto customerDto = new CustomerDto();
-		customerDto.setParentCompany(csvRecord.get(CustomerCSVFileHeaders.ParentCompany));
-		customerDto.setDataImportFk(csvRecord.get(CustomerCSVFileHeaders.DataImportfk));
-		customerDto.setCustomerCode(csvRecord.get(CustomerCSVFileHeaders.CustomerCode));
-		customerDto.setCustomerName(csvRecord.get(CustomerCSVFileHeaders.CustomerName));
-		customerDto.setCustomerAlias(csvRecord.get(CustomerCSVFileHeaders.CustomerAlias));
-		customerDto.setCustomerType(csvRecord.get(CustomerCSVFileHeaders.CustomerType));
-		customerDto.setBrand(csvRecord.get(CustomerCSVFileHeaders.Brand));
-		customerDto.setSupplyState(csvRecord.get(CustomerCSVFileHeaders.SupplyState));
-		customerDto.setGstType(csvRecord.get(CustomerCSVFileHeaders.GSTType));
-		customerDto.setTaxExempt(Boolean.valueOf(csvRecord.get(CustomerCSVFileHeaders.IsTaxExempt)));
-		customerDto.setGreeting(csvRecord.get(CustomerCSVFileHeaders.Greeting));
-		customerDto.setCreditStatus(csvRecord.get(CustomerCSVFileHeaders.CreditStatus));
-		customerDto.setRating(csvRecord.get(CustomerCSVFileHeaders.Rating));
-		boolean isAllowed = Integer.valueOf(csvRecord.get(CustomerCSVFileHeaders.AllowDuplicateGSTIN.name())) == 0
-				? false
-				: true;
+		customerDto.setParentCompany(csvRecord.get(CustomerCSVFileHeaders.parentCompany.name().toUpperCase()));
+		if (!csvRecord.get(CustomerCSVFileHeaders.dataimportfk.name().toUpperCase()).equals("0")) {
+			customerDto.setDataimportfk(UUID.fromString(csvRecord.get(CustomerCSVFileHeaders.dataimportfk.name().toUpperCase())));
+		}
+		customerDto.setCustomerCode(csvRecord.get(CustomerCSVFileHeaders.customerCode.name().toUpperCase()));
+		customerDto.setCustomerName(csvRecord.get(CustomerCSVFileHeaders.customerName.name().toUpperCase()));
+		customerDto.setCustomerAlias(csvRecord.get(CustomerCSVFileHeaders.customerAlias.name().toUpperCase()));
+		customerDto.setCustomerType(csvRecord.get(CustomerCSVFileHeaders.customerType.name().toUpperCase()));
+		customerDto.setBrand(csvRecord.get(CustomerCSVFileHeaders.brand.name().toUpperCase()));
+		customerDto.setSupplyState(csvRecord.get(CustomerCSVFileHeaders.supplyState.name().toUpperCase()));
+		customerDto.setGstType(csvRecord.get(CustomerCSVFileHeaders.gstType.name().toUpperCase()));
+		customerDto
+				.setTaxexempt(Boolean.valueOf(csvRecord.get(CustomerCSVFileHeaders.istaxexempt.name().toUpperCase())));
+		customerDto.setGreeting(csvRecord.get(CustomerCSVFileHeaders.greeting.name().toUpperCase()));
+		customerDto.setCreditStatus(csvRecord.get(CustomerCSVFileHeaders.creditStatus.name().toUpperCase()));
+		customerDto.setRating(csvRecord.get(CustomerCSVFileHeaders.rating.name().toUpperCase()));
+		boolean isAllowed = Integer
+				.valueOf(csvRecord.get(CustomerCSVFileHeaders.allowDuplicateGSTIN.name().toUpperCase())) == 0 ? false
+						: true;
 		customerDto.setAllowDuplicateGSTIN(isAllowed);
-		customerDto.setCustomerGstIn(csvRecord.get(CustomerCSVFileHeaders.CustomerGSTIN));
-		customerDto.setSupplyGstIn(csvRecord.get(CustomerCSVFileHeaders.SupplyGSTIN));
-		if (!csvRecord.get(CustomerCSVFileHeaders.PhoneNo).isBlank()
-				|| !csvRecord.get(CustomerCSVFileHeaders.PhoneNo).isEmpty())
-			customerDto.setPhoneNo(Long.valueOf(csvRecord.get(CustomerCSVFileHeaders.PhoneNo)));
-		if (!csvRecord.get(CustomerCSVFileHeaders.MobileNo).isEmpty())
-			customerDto.setMobileNo(Long.valueOf(csvRecord.get(CustomerCSVFileHeaders.MobileNo)));
-		if (!csvRecord.get(CustomerCSVFileHeaders.FaxNumber).isEmpty())
-			customerDto.setFaxNumber(Long.valueOf(csvRecord.get(CustomerCSVFileHeaders.FaxNumber)));
-		customerDto.setEmail(csvRecord.get(CustomerCSVFileHeaders.Email));
-		customerDto.setWebsite(csvRecord.get(CustomerCSVFileHeaders.Website));
-		customerDto.setTanNo(csvRecord.get(CustomerCSVFileHeaders.TANNo));
-		customerDto.setPanNo(csvRecord.get(CustomerCSVFileHeaders.PANNo));
-		customerDto.setSlNo(Integer.valueOf(csvRecord.get(CustomerCSVFileHeaders.SlNo)));
+		customerDto.setCustomerGstIn(csvRecord.get(CustomerCSVFileHeaders.customerGstIn.name().toUpperCase()));
+		customerDto.setSupplyGstIn(csvRecord.get(CustomerCSVFileHeaders.supplyGstIn.name().toUpperCase()));
+		if (!csvRecord.get(CustomerCSVFileHeaders.phoneno.name().toUpperCase()).isBlank()
+				|| !csvRecord.get(CustomerCSVFileHeaders.phoneno.name().toUpperCase()).isEmpty())
+			customerDto.setPhoneno(Long.valueOf(csvRecord.get(CustomerCSVFileHeaders.phoneno.name().toUpperCase())));
+		if (!csvRecord.get(CustomerCSVFileHeaders.mobileno.name().toUpperCase()).isEmpty())
+			customerDto.setMobileno(Long.valueOf(csvRecord.get(CustomerCSVFileHeaders.mobileno.name().toUpperCase())));
+		if (!csvRecord.get(CustomerCSVFileHeaders.faxnumber.name().toUpperCase()).isEmpty())
+			customerDto
+					.setFaxnumber(Long.valueOf(csvRecord.get(CustomerCSVFileHeaders.faxnumber.name().toUpperCase())));
+		customerDto.setEmail(csvRecord.get(CustomerCSVFileHeaders.email.name().toUpperCase()));
+		customerDto.setWebsite(csvRecord.get(CustomerCSVFileHeaders.website.name().toUpperCase()));
+		customerDto.setTanno(csvRecord.get(CustomerCSVFileHeaders.tanno.name().toUpperCase()));
+		customerDto.setPanno(csvRecord.get(CustomerCSVFileHeaders.panno.name().toUpperCase()));
+		customerDto.setSlNo(Integer.valueOf(csvRecord.get(CustomerCSVFileHeaders.SlNo.name().toUpperCase())));
 		return customerDto;
 	}
 
@@ -200,7 +215,7 @@ public class CustomerService {
 	public Customer convertcustomerDtoToObj(CustomerDto customerDto) {
 		Customer customer = new Customer();
 		customer.setParentcustomerfk(customerRepository.getParentCustomerId(customerDto.getParentCompany()));
-		customer.setPanno(customerDto.getPanNo());
+		customer.setPanno(customerDto.getPanno());
 		customer.setSupplygstin(customerDto.getSupplyGstIn());
 		customer.setCustomergstin(customerDto.getCustomerGstIn());
 		customer.setCustomeralias(customerDto.getCustomerAlias());
@@ -208,24 +223,334 @@ public class CustomerService {
 		customer.setCustomercode(customerDto.getCustomerCode());
 		customer.setCustomertypefk(dbConfig.getCustomerTypes().get(customerDto.getCustomerType().toUpperCase()));
 		customer.setCustomername(customerDto.getCustomerName());
-		if (!customerDto.getDataImportFk().equals("0")) {
-			customer.setDataimportfk(UUID.fromString(customerDto.getDataImportFk()));
-		}
+		customer.setDataimportfk(customerDto.getDataimportfk());
 		customer.setBrandfk(brandRepository.fetchByBrandName(customerDto.getBrand()));
-		customer.setIstaxexempt(customerDto.isTaxExempt());
+		customer.setIstaxexempt(customerDto.isTaxexempt());
 		customer.setAllowduplicategstin(customerDto.isAllowDuplicateGSTIN());
-		customer.setPhoneno(Long.valueOf(customerDto.getPhoneNo()));
-		customer.setMobileno(customerDto.getMobileNo());
-		customer.setFaxnumber(customerDto.getFaxNumber());
+		customer.setPhoneno(Long.valueOf(customerDto.getPhoneno()));
+		customer.setMobileno(customerDto.getMobileno());
+		customer.setFaxnumber(customerDto.getFaxnumber());
 		customer.setEmail(customerDto.getEmail());
 		customer.setWebsite(customerDto.getWebsite());
-		customer.setTanno(customerDto.getTanNo());
+		customer.setTanno(customerDto.getTanno());
 		customer.setGreetingfk(dbConfig.getGreetings().get(customerDto.getGreeting().toUpperCase()));
 		customer.setAllowduplicategstin(customerDto.isAllowDuplicateGSTIN());
-		customer.setIstaxexempt(customerDto.isTaxExempt());
+		customer.setIstaxexempt(customerDto.isTaxexempt());
 		customer.setGsttypefk(dbConfig.getGstnTypes().get(customerDto.getGstType().toUpperCase()));
 		customer.setCreditstatusfk(dbConfig.getCreditStatuses().get(customerDto.getCreditStatus().toUpperCase()));
 		customer.setRatingfk(dbConfig.getRatings().get(customerDto.getRating().toUpperCase()));
+		customer.setIsactive(customerDto.isIsactive());
 		return customer;
+	}
+
+	/**
+	 * validates the provided customerDto and creates new Customer if there are no
+	 * errors
+	 * 
+	 * @param customerDto
+	 * @return Customer
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 * @throws Exception            if there are validation errors
+	 */
+	public CustomerDto createCustomer(CustomerDto customerDto)
+			throws ValidationException, InterruptedException, ExecutionException {
+		Customer customer = null;
+		Customer updatedCustomer = null;
+		Map<String, String> errors = customerFieldsValidator.validateCustomerDto(customerDto).get();
+		if (errors.isEmpty()) {
+			customer = convertcustomerDtoToObj(customerDto);
+			updatedCustomer = customerRepository.save(customer);
+		} else {
+			StringBuffer errorMsg = new StringBuffer();
+			errors.forEach((k,v)->{
+				errorMsg.append(k+"-"+v);
+				errorMsg.append(";");
+			});
+			throw new ValidationException(errorMsg.toString());
+		}
+		return convertCustomertoCustomerDto(updatedCustomer);
+	}
+
+	/**
+	 * deactivates the customer by customerId if exists
+	 * 
+	 * @param customerId
+	 * @throws Exception if customer doesn't exist
+	 */
+	public void deactivateCustomer(UUID customerId) throws NoSuchElementException {
+		Customer customer = customerRepository.findById(customerId).get();
+		if (customer != null) {
+			customer.setIsactive(false);
+			customerRepository.save(customer);
+		}
+	}
+
+	/**
+	 * Fetches customerInfo by customerId if exists
+	 * 
+	 * @param customerId
+	 * @return
+	 * @throws Exception if customer doesn't exists
+	 */
+	public CustomerDto getCustomerInfo(UUID customerId) throws NoSuchElementException {
+		Customer customer = customerRepository.findById(customerId).get();
+		return convertCustomertoCustomerDto(customer);
+	}
+
+	/**
+	 * 
+	 * @param customerId
+	 * @param customerDto
+	 * @return
+	 * @throws EmptyDataException
+	 * @throws Exception
+	 */
+	public CustomerDto updateCustomer(UUID customerId, Map<String, String> valuesToUpdate) throws EmptyDataException {
+		Customer customer = customerRepository.findById(customerId).get();
+		if (valuesToUpdate == null || (valuesToUpdate != null && valuesToUpdate.isEmpty())) {
+			throw new EmptyDataException("No data to update");
+		} else {
+			StringBuffer errorMsg = new StringBuffer();
+			if (valuesToUpdate.containsKey((CustomerCSVFileHeaders.customerType.name()))) {
+				customer.setCustomertypefk(dbConfig.getCustomerTypes()
+						.get(valuesToUpdate.get(CustomerCSVFileHeaders.customerType.name())));
+				valuesToUpdate.remove(CustomerCSVFileHeaders.customerType.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.creditStatus.name())) {
+				customer.setCreditstatusfk(dbConfig.getCreditStatuses()
+						.get(valuesToUpdate.get(CustomerCSVFileHeaders.creditStatus.name())));
+				valuesToUpdate.remove(CustomerCSVFileHeaders.creditStatus.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.supplyState.name())) {
+				customer.setSupplystatefk(
+						dbConfig.getStatesMap().get(valuesToUpdate.get(CustomerCSVFileHeaders.supplyState.name())));
+				valuesToUpdate.remove(CustomerCSVFileHeaders.supplyState.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.greeting.name())) {
+				customer.setGreetingfk(
+						dbConfig.getGreetings().get(valuesToUpdate.get(CustomerCSVFileHeaders.greeting.name())));
+				valuesToUpdate.remove(CustomerCSVFileHeaders.greeting.name());
+			}
+
+			String gstnType = getKeyByValue(dbConfig.getGstnTypes(), customer.getGsttypefk());
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.gstType.name())) {
+				gstnType = valuesToUpdate.get(CustomerCSVFileHeaders.gstType.name());
+				if (dbConfig.getGstnTypes().get(gstnType) != null) {
+					customer.setGsttypefk(dbConfig.getGstnTypes().get(gstnType));
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.gstType.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.rating.name())) {
+				customer.setRatingfk(
+						dbConfig.getRatings().get(valuesToUpdate.get(CustomerCSVFileHeaders.rating.name())));
+				valuesToUpdate.remove(CustomerCSVFileHeaders.rating.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.parentCompany.name())) {
+				if (valuesToUpdate.get(CustomerCSVFileHeaders.parentCompany.name()) != null) {
+					UUID parentCustomerId = customerRepository
+							.getParentCustomerId(valuesToUpdate.get(CustomerCSVFileHeaders.parentCompany.name()));
+					if (parentCustomerId != null) {
+						customer.setParentcustomerfk(parentCustomerId);
+					} else {
+						customer.setParentcustomerfk(null);
+					}
+				} else {
+					customer.setParentcustomerfk(null);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.parentCompany.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.brand.name())) {
+				if (valuesToUpdate.get(CustomerCSVFileHeaders.brand.name()) != null) {
+					UUID brandUUID = brandRepository
+							.fetchByBrandName(valuesToUpdate.get(CustomerCSVFileHeaders.brand.name()));
+					if (brandUUID != null) {
+						customer.setBrandfk(brandUUID);
+					} else {
+						throw new NoSuchElementException("Given brand doesn't exist");
+					}
+				} else {
+					customer.setBrandfk(null);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.brand.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.customerName.name())) {
+				String name = valuesToUpdate.get(CustomerCSVFileHeaders.customerName.name());
+				if (name != null && customerRepository.findCustomerName(name) != null) {
+					errorMsg.append(CustomerCSVFileHeaders.customerName.name().toUpperCase() + "-"
+							+ "Customer Name already exists");
+				} else {
+					customer.setCustomername(name);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.customerName.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.customerAlias.name())) {
+				String name = valuesToUpdate.get(CustomerCSVFileHeaders.customerAlias.name());
+				if (name != null && customerRepository.findCustomerAlias(name) != null) {
+					errorMsg.append(CustomerCSVFileHeaders.customerAlias.name().toUpperCase() + "-"
+							+ "Customer Alias already exists");
+				} else {
+					customer.setCustomeralias(name);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.customerAlias.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.customerCode.name())) {
+				String name = valuesToUpdate.get(CustomerCSVFileHeaders.customerCode.name());
+				if (name != null && customerRepository.findCustomerCode(name) != null) {
+					errorMsg.append(CustomerCSVFileHeaders.customerCode.name().toUpperCase() + "-"
+							+ "Customer Code already exists");
+				} else {
+					customer.setCustomercode(name);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.customerCode.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.allowDuplicateGSTIN.name())
+					&& ((valuesToUpdate.get(CustomerCSVFileHeaders.allowDuplicateGSTIN.name()) != null))) {
+				customer.setAllowduplicategstin(
+						Boolean.valueOf(valuesToUpdate.get(CustomerCSVFileHeaders.allowDuplicateGSTIN.name())));
+				valuesToUpdate.remove(CustomerCSVFileHeaders.allowDuplicateGSTIN.name());
+			}
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.customerGstIn.name())) {
+				String customerGstIn = valuesToUpdate.get(CustomerCSVFileHeaders.customerGstIn.name());
+				if (!customer.isAllowduplicategstin() && customerGstIn != null
+						&& customerRepository.findCustomerGSTIN(customerGstIn).size() > 0) {
+					errorMsg.append(CustomerCSVFileHeaders.customerGstIn.name().toUpperCase() + "-"
+							+ "Customer GSTIN already exists ");
+				} else {
+					customer.setCustomergstin(customerGstIn);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.customerGstIn.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.supplyGstIn.name())) {
+				String supplyGstIn = valuesToUpdate.get(CustomerCSVFileHeaders.supplyGstIn.name());
+				if (!customer.isAllowduplicategstin() && supplyGstIn != null
+						&& customerRepository.findSupplyGSTIN(supplyGstIn).size() > 0) {
+					errorMsg.append(CustomerCSVFileHeaders.supplyGstIn.name().toUpperCase() + "-"
+							+ "Supplier GSTIN already exists ");
+				} else {
+					customer.setSupplygstin(supplyGstIn);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.supplyGstIn.name());
+			}
+
+			if (valuesToUpdate.containsKey(CustomerCSVFileHeaders.panno.name())) {
+				String panNo = valuesToUpdate.get(CustomerCSVFileHeaders.panno.name());
+				if (!customer.isAllowduplicategstin() && panNo != null
+						&& customerRepository.findPanNo(panNo).size() > 0) {
+					errorMsg.append(
+							CustomerCSVFileHeaders.panno.name().toUpperCase() + "-" + "PAN number already exists");
+				} else {
+					customer.setPanno(panNo);
+				}
+				valuesToUpdate.remove(CustomerCSVFileHeaders.panno.name());
+			}
+
+			if (gstnType != null && gstnType.equalsIgnoreCase(GSTNTypeEnum.Registered.name().toUpperCase())
+					&& customer.getCustomergstin() == null) {
+				errorMsg.append(CustomerCSVFileHeaders.customerGstIn.name().toUpperCase() + "-"
+						+ "CustomerGSTIN is not available for " + GSTNTypeEnum.Registered.name() + " Customer "
+						+ customer.getCustomername());
+			}
+
+			if (gstnType != null && gstnType.equalsIgnoreCase(GSTNTypeEnum.Unregistered.name())
+					&& customer.getPanno() == null) {
+				errorMsg.append(
+						CustomerCSVFileHeaders.panno.name().toUpperCase() + "-" + "PAN number is not available for "
+								+ GSTNTypeEnum.Unregistered.name() + customer.getCustomername());
+			}
+
+			if (!valuesToUpdate.isEmpty()) {
+				customer.updateValues(customer, valuesToUpdate);
+			}
+
+			CustomerDto customerDto = convertCustomertoCustomerDto(customer);
+			Set<ConstraintViolation<CustomerDto>> validationErrors = validator.validate(customerDto);
+			if (!validationErrors.isEmpty()) {
+				for (ConstraintViolation<CustomerDto> c : validationErrors) {
+					errorMsg.append(c.getPropertyPath().toString() + "-" + c.getMessage());
+					errorMsg.append(";");
+				}
+			}
+			if (!errorMsg.isEmpty()) {
+				throw new ValidationException(errorMsg.toString());
+			} else {
+				Customer updatedCustomer = customerRepository.save(customer);
+				return convertCustomertoCustomerDto(updatedCustomer);
+			}
+		}
+	}
+
+	/**
+	 * convert Customer object to CustomerDto
+	 * 
+	 * @param customer
+	 * @return
+	 */
+	private CustomerDto convertCustomertoCustomerDto(Customer customer) {
+		CustomerDto customerDto = new CustomerDto();
+		customerDto.setCustomerpk(customer.getCustomerpk());
+		customerDto.setCustomerAlias(customer.getCustomeralias());
+		customerDto.setCustomerCode(customer.getCustomercode());
+		customerDto.setCustomerName(customer.getCustomername());
+		customerDto.setAllowDuplicateGSTIN(customer.isAllowduplicategstin());
+		customerDto.setCustomerGstIn(customer.getCustomergstin());
+		if (customer.getBrandfk() != null) {
+			Optional<Brand> brand = brandRepository.findById(customer.getBrandfk());
+			if (brand != null) {
+				customerDto.setBrand(brand.get().getBrandname());
+			}
+		}
+		customerDto.setEmail(customer.getEmail());
+		customerDto.setIsactive(customer.isIsactive());
+		customerDto.setMobileno(customer.getMobileno());
+		customerDto.setPanno(customer.getPanno());
+		if (customer.getParentcustomerfk() != null) {
+			Optional<Customer> parentCompany = customerRepository.findById(customer.getParentcustomerfk());
+			if (parentCompany != null) {
+				customerDto.setParentCompany(parentCompany.get().getCustomername());
+			}
+		}
+		customerDto.setPhoneno(customer.getPhoneno());
+		customerDto.setSupplyGstIn(customer.getSupplygstin());
+		customerDto.setTanno(customer.getTanno());
+		customerDto.setTaxexempt(customer.isIstaxexempt());
+		customerDto.setWebsite(customer.getWebsite());
+		customerDto.setCreditStatus(getKeyByValue(dbConfig.getCreditStatuses(), customer.getCreditstatusfk()));
+		customerDto.setSupplyState(getKeyByValue(dbConfig.getStatesMap(), customer.getSupplystatefk()));
+		customerDto.setCustomerType(getKeyByValue(dbConfig.getCustomerTypes(), customer.getCustomertypefk()));
+		customerDto.setGreeting(getKeyByValue(dbConfig.getGreetings(), customer.getGreetingfk()));
+		customerDto.setGstType(getKeyByValue(dbConfig.getGstnTypes(), customer.getGsttypefk()));
+		customerDto.setRating(getKeyByValue(dbConfig.getRatings(), customer.getRatingfk()));
+		customerDto.setDataimportfk(customer.getDataimportfk());
+		customerDto.setFaxnumber(customer.getFaxnumber());
+		return customerDto;
+	}
+
+	/**
+	 * fetch key by value for
+	 * state,customertype,greeting,rating,gsttype,creditstatus
+	 * 
+	 * @param map
+	 * @param value
+	 * @return
+	 */
+	private String getKeyByValue(Map<String, UUID> map, UUID value) {
+		for (Map.Entry<String, UUID> entry : map.entrySet()) {
+			if (value != null && value.equals(entry.getValue())) {
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 }

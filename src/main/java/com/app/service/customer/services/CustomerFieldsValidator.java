@@ -51,22 +51,23 @@ public class CustomerFieldsValidator {
 		try {
 			CustomerNameDto custNameDto = diffCustNames.get();
 			if (custNameDto.getCustomerAlias() != null) {
-				errors.put(CustomerCSVFileHeaders.CustomerAlias.name(), "Customer Alias already exists");
+				errors.put(CustomerCSVFileHeaders.customerAlias.name().toUpperCase(), "Customer Alias already exists");
 			}
 			if (custNameDto.getCustomerCode() != null) {
-				errors.put(CustomerCSVFileHeaders.CustomerCode.name(), "Customer Code already exists");
+				errors.put(CustomerCSVFileHeaders.customerCode.name().toUpperCase(), "Customer Code already exists");
 			}
 			if (custNameDto.getCustomerName() != null) {
-				errors.put(CustomerCSVFileHeaders.CustomerName.name(), "Customer Name already exists");
+				errors.put(CustomerCSVFileHeaders.customerName.name().toUpperCase(), "Customer Name already exists");
 			}
 			if (customerDto.getGstType().equalsIgnoreCase(GSTNTypeEnum.Registered.name())
 					&& customerDto.getCustomerGstIn() == null) {
-				errors.put(CustomerCSVFileHeaders.CustomerGSTIN.name(), "CustomerGSTIN is not available for "
-						+ GSTNTypeEnum.Registered.name() + customerDto.getCustomerName());
+				errors.put(CustomerCSVFileHeaders.customerGstIn.name().toUpperCase(),
+						"CustomerGSTIN is not available for " + GSTNTypeEnum.Registered.name()
+								+ customerDto.getCustomerName());
 			}
 			if (customerDto.getGstType().equalsIgnoreCase(GSTNTypeEnum.Unregistered.name())
-					&& customerDto.getPanNo() == null) {
-				errors.put(CustomerCSVFileHeaders.PANNo.name(), "PAN number is not available for "
+					&& customerDto.getPanno() == null) {
+				errors.put(CustomerCSVFileHeaders.panno.name().toUpperCase(), "PAN number is not available for "
 						+ GSTNTypeEnum.Unregistered.name() + customerDto.getCustomerName());
 			}
 
@@ -78,21 +79,17 @@ public class CustomerFieldsValidator {
 
 		if (!customerDto.isAllowDuplicateGSTIN()) {
 			try {
-				GSTINAndPanDto gstinAndPanDto = customerFieldsByNameValidator
-						.getGSTINAndPANDetails(customerDto.getCustomerName(), customerDto.getCustomerGstIn(),
-								customerDto.getSupplyGstIn(), customerDto.getPanNo())
-						.get();
+				GSTINAndPanDto gstinAndPanDto = customerFieldsByNameValidator.getGSTINAndPANDetails(
+						customerDto.getCustomerGstIn(), customerDto.getSupplyGstIn(), customerDto.getPanno()).get();
 				if (gstinAndPanDto.getCustomerGstIn() != null) {
-					errors.put(CustomerCSVFileHeaders.CustomerGSTIN.name(),
-							"Customer GSTIN already exists" + "for given " + customerDto.getCustomerName());
+					errors.put(CustomerCSVFileHeaders.customerGstIn.name().toUpperCase(),
+							"Customer GSTIN already exists");
 				}
 				if (gstinAndPanDto.getSupplyGstIn() != null) {
-					errors.put(CustomerCSVFileHeaders.SupplyGSTIN.name(),
-							"SupplyGSTIN already exists" + " for given " + customerDto.getCustomerName());
+					errors.put(CustomerCSVFileHeaders.supplyGstIn.name().toLowerCase(), "SupplyGSTIN already exists");
 				}
 				if (gstinAndPanDto.getPanNo() != null) {
-					errors.put(CustomerCSVFileHeaders.PANNo.name(),
-							"PanNo already exists " + "for " + customerDto.getCustomerName());
+					errors.put(CustomerCSVFileHeaders.panno.name().toUpperCase(), "PanNo already exists ");
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error(

@@ -15,7 +15,7 @@ public class GreetingTypeValidator implements ConstraintValidator<IsValidGreetin
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return dbConfig.getGreetings().containsKey(value.toUpperCase());
+		return (value != null && dbConfig.getGreetings().containsKey(value.toUpperCase()))?true:false;
 	}
 
 }

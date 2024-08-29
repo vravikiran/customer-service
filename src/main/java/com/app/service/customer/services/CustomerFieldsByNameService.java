@@ -21,30 +21,39 @@ public class CustomerFieldsByNameService {
 	private CustomerRepository customerRepository;
 
 	/**
-	 * Fetches customer name, customer code and customer alias columns from customer table
+	 * Fetches customer name, customer code and customer alias columns from customer
+	 * table
+	 * 
 	 * @param customerName
 	 * @param customerAlias
 	 * @param customerCode
 	 * @return
 	 */
-	public CompletableFuture<CustomerNameDto> fetchDiffCustomerNames(String customerName,String customerAlias, String customerCode) {
-		return CompletableFuture.completedFuture(customerRepository.getDiffCustomerNames(customerName, customerAlias, customerCode));
+	public CompletableFuture<CustomerNameDto> fetchDiffCustomerNames(String customerName, String customerAlias,
+			String customerCode) {
+		return CompletableFuture
+				.completedFuture(customerRepository.getDiffCustomerNames(customerName, customerAlias, customerCode));
 	}
-	
+
 	/**
-	 * Fetches customerGstIn,supplyGstIn,panNo columns from customer table based on customer name
+	 * Fetches customerGstIn,supplyGstIn,panNo columns from customer table based on
+	 * customer name
+	 * 
 	 * @param customerName
 	 * @param customerGstIn
 	 * @param supplyGstIn
 	 * @param panNo
 	 * @return
 	 */
-	public CompletableFuture<GSTINAndPanDto> getGSTINAndPANDetails(String customerName,String customerGstIn,String supplyGstIn, String panNo) {
-		return CompletableFuture.completedFuture(customerRepository.getGSTINAndPANDetails(customerGstIn, supplyGstIn, panNo, customerName));
+	public CompletableFuture<GSTINAndPanDto> getGSTINAndPANDetails(String customerGstIn, String supplyGstIn,
+			String panNo) {
+		return CompletableFuture
+				.completedFuture(customerRepository.getGSTINAndPANDetails(customerGstIn, supplyGstIn, panNo));
 	}
-	
+
 	/**
 	 * Method to fetch parent customer id for given customer name
+	 * 
 	 * @param customerName
 	 * @return
 	 */

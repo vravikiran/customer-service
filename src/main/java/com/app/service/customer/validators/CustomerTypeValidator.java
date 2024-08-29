@@ -15,7 +15,7 @@ public class CustomerTypeValidator implements ConstraintValidator<IsValidCustome
 	
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return dbConfig.getCustomerTypes().containsKey(value.toUpperCase());
+		return (value != null && dbConfig.getCustomerTypes().containsKey(value.toUpperCase()))?true:false;
 	}
 
 }

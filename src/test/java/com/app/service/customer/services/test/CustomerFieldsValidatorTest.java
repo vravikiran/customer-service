@@ -56,14 +56,15 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertTrue(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
-	public void testValidateCustomerDto_WithEmptyCustGSTINAndRegGstType() throws InterruptedException, ExecutionException {
+	public void testValidateCustomerDto_WithEmptyCustGSTINAndRegGstType()
+			throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
 		customerDto.setAllowDuplicateGSTIN(false);
 		constraintViolations = new HashSet<>();
@@ -76,12 +77,12 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
 	public void testValidateCustomerDto_WithCustGSTINAndRegGstType() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
@@ -97,12 +98,12 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertTrue(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
 	public void testValidateCustomerDto_WithEmptyPanAndUnRegGstType() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
@@ -117,12 +118,12 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
 	public void testValidateCustomerDto_WithDupCustName() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
@@ -137,12 +138,12 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
 	public void testValidateCustomerDto_WithDupCustAlias() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
@@ -157,14 +158,15 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
-	public void testValidateCustomerDto_WithDisAllowDupGstnAndCustGSTNVal() throws InterruptedException, ExecutionException {
+	public void testValidateCustomerDto_WithDisAllowDupGstnAndCustGSTNVal()
+			throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
 		customerDto.setAllowDuplicateGSTIN(false);
 		customerDto.setGstType(GSTNTypeEnum.Unregistered.name());
@@ -177,14 +179,15 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
-	public void testValidateCustomerDto_WithDisAllowDupGstnAndSuppGSTNVal() throws InterruptedException, ExecutionException {
+	public void testValidateCustomerDto_WithDisAllowDupGstnAndSuppGSTNVal()
+			throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
 		customerDto.setAllowDuplicateGSTIN(false);
 		customerDto.setGstType(GSTNTypeEnum.Unregistered.name());
@@ -197,12 +200,12 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn("Dummy");
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
 	public void testValidateCustomerDto_WithDisAllowDupGstnAndPanNo() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
@@ -217,13 +220,12 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn("Dummy");
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
-	
+
 	@Test
 	public void testValidateCustomerDto_WithDupCustCode() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
@@ -238,18 +240,18 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertFalse(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
-	
+
 	@Test
 	public void testValidateCustomerDto_WithValidPanAndUnRegGstType() throws InterruptedException, ExecutionException {
 		customerDto = buildCustomerDto();
 		customerDto.setAllowDuplicateGSTIN(false);
 		customerDto.setGstType(GSTNTypeEnum.Unregistered.name());
-		customerDto.setPanNo("DUMMY");
+		customerDto.setPanno("DUMMY");
 		constraintViolations = new HashSet<>();
 		when(validator.validate(any())).thenReturn(constraintViolations);
 		when(customerNameDto.getCustomerAlias()).thenReturn(null);
@@ -259,8 +261,8 @@ public class CustomerFieldsValidatorTest {
 		when(gstinAndPanDto.getPanNo()).thenReturn(null);
 		when(gstinAndPanDto.getSupplyGstIn()).thenReturn(null);
 		when(customerFieldsByNameValidator.fetchDiffCustomerNames(any(), any(), any()))
-		.thenReturn(CompletableFuture.completedFuture(customerNameDto));
-		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any(), any()))
+				.thenReturn(CompletableFuture.completedFuture(customerNameDto));
+		when(customerFieldsByNameValidator.getGSTINAndPANDetails(any(), any(), any()))
 				.thenReturn(CompletableFuture.completedFuture(gstinAndPanDto));
 		assertTrue(customerFieldsValidator.validateCustomerDto(customerDto).get().isEmpty());
 	}
