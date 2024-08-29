@@ -97,7 +97,7 @@ public class CustomerServiceTest {
 
 	@Test
 	public void testUploadCustomerInfo_WithValidFile() throws IOException {
-		File file = new File("./src/test/resources/data.csv");
+		File file = new File("./src/test/resources/valid_customer_data.csv");
 		InputStream inputStream = new FileInputStream(file);
 		Map<String, String> errors = new HashMap<>();
 		doReturn(customer).when(customerService).convertcustomerDtoToObj(any());
@@ -107,7 +107,7 @@ public class CustomerServiceTest {
 
 	@Test
 	public void testUploadCustomerInfo_WithErrorsInFile() throws IOException {
-		File file = new File("./src/test/resources/data.csv");
+		File file = new File("./src/test/resources/valid_customer_data.csv");
 		InputStream inputStream = new FileInputStream(file);
 		Map<String, String> errors = new HashMap<>();
 		errors.put(CustomerCSVFileHeaders.Duplicate.name(), "duplicate customer record");
