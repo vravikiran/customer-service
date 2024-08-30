@@ -65,7 +65,7 @@ public class EmployeeServiceTest {
 	@Test
 	public void testUploadEmployeesInfo_WithValidData() throws IOException {
 		Set<ConstraintViolation<Employee>> empErrorRows = new HashSet<>();
-		File file = new File("./src/test/resources/Employee_Valid.csv");
+		File file = new File("./src/test/resources/Employee_valid_data.csv");
 		InputStream inputStream = new FileInputStream(file);
 		doReturn(empErrorRows).when(validator).validate(any());
 		assertTrue(employeeService.uploadEmployeesInfo(inputStream));
@@ -75,7 +75,7 @@ public class EmployeeServiceTest {
 	public void testUploadEmployeesInfo_WithInValidData() throws IOException {
 		Set<ConstraintViolation<Employee>> empErrorRows = new HashSet<>();
 		empErrorRows.add(constraint);
-		File file = new File("./src/test/resources/Employee_Valid.csv");
+		File file = new File("./src/test/resources/Employee_valid_data.csv");
 		InputStream inputStream = new FileInputStream(file);
 		doReturn(empErrorRows).when(validator).validate(any());
 		assertFalse(employeeService.uploadEmployeesInfo(inputStream));
@@ -149,7 +149,6 @@ public class EmployeeServiceTest {
 
 			@Override
 			public Iterator<Node> iterator() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		};
@@ -177,7 +176,6 @@ public class EmployeeServiceTest {
 
 			@Override
 			public Iterator<Node> iterator() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		};

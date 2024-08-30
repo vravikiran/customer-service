@@ -107,20 +107,20 @@ public class EmployeeService {
 	 */
 	private Employee convertCSVRecordToEmployee(CSVRecord csvRecord) {
 		Employee employee = new Employee();
-		employee.setSlNo(Integer.valueOf(csvRecord.get(EmployeeCSVFileHeaders.SlNo)));
-		String customerName = csvRecord.get(EmployeeCSVFileHeaders.CustomerName);
+		employee.setSlNo(Integer.valueOf(csvRecord.get(EmployeeCSVFileHeaders.SLNO)));
+		String customerName = csvRecord.get(EmployeeCSVFileHeaders.CUSTOMERNAME);
 		employee.setCustomerfk(customerRepository.getParentCustomerId(customerName));
-		employee.setDesignation(csvRecord.get(EmployeeCSVFileHeaders.Designation));
-		employee.setDepartment(csvRecord.get(EmployeeCSVFileHeaders.Department));
-		employee.setEmpname(csvRecord.get(EmployeeCSVFileHeaders.EmpName));
-		employee.setPhoneno(Long.parseLong(csvRecord.get(EmployeeCSVFileHeaders.Phone)));
-		employee.setMobileno(Long.parseLong(csvRecord.get(EmployeeCSVFileHeaders.Mobile)));
-		employee.setEmail(csvRecord.get(EmployeeCSVFileHeaders.Email));
+		employee.setDesignation(csvRecord.get(EmployeeCSVFileHeaders.DESIGNATION));
+		employee.setDepartment(csvRecord.get(EmployeeCSVFileHeaders.DEPARTMENT));
+		employee.setEmpname(csvRecord.get(EmployeeCSVFileHeaders.EMPNAME));
+		employee.setPhoneno(Long.parseLong(csvRecord.get(EmployeeCSVFileHeaders.PHONE)));
+		employee.setMobileno(Long.parseLong(csvRecord.get(EmployeeCSVFileHeaders.MOBILE)));
+		employee.setEmail(csvRecord.get(EmployeeCSVFileHeaders.EMAIL));
 		DateTimeFormatter da = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		employee.setDob(LocalDate.parse(csvRecord.get(EmployeeCSVFileHeaders.DoB), da));
-		employee.setAnniversarydate(LocalDate.parse(csvRecord.get(EmployeeCSVFileHeaders.AnniversaryDate), da));
+		employee.setDob(LocalDate.parse(csvRecord.get(EmployeeCSVFileHeaders.DOB), da));
+		employee.setAnniversarydate(LocalDate.parse(csvRecord.get(EmployeeCSVFileHeaders.ANNIVERSARYDATE), da));
 		employee.setCdate(LocalDate.now());
-		boolean isActive = Integer.valueOf(csvRecord.get(EmployeeCSVFileHeaders.IsActive)) == 0 ? false : true;
+		boolean isActive = Integer.valueOf(csvRecord.get(EmployeeCSVFileHeaders.ISACTIVE)) == 0 ? false : true;
 		employee.setIsactive(isActive);
 		return employee;
 	}

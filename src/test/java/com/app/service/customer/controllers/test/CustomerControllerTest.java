@@ -96,7 +96,7 @@ public class CustomerControllerTest {
 		String customerJson = new ObjectMapper().writeValueAsString(new CustomerDto());
 		when(customerService.createCustomer(any())).thenThrow(new ValidationException());
 		mockMvc.perform(post("/customer").accept(MediaType.APPLICATION_JSON)
-				.content(customerJson).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is5xxServerError());
+				.content(customerJson).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError());
 	}
 
 	@Test

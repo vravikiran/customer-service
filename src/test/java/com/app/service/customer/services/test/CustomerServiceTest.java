@@ -17,10 +17,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -35,16 +38,21 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.app.service.customer.config.DBConfig;
+import com.app.service.customer.entities.Brand;
 import com.app.service.customer.entities.Customer;
 import com.app.service.customer.entities.CustomerDto;
 import com.app.service.customer.enums.CustomerCSVFileHeaders;
 import com.app.service.customer.exceptions.EmptyDataException;
+import com.app.service.customer.repositories.BrandRepository;
 import com.app.service.customer.repositories.CustomerRepository;
 import com.app.service.customer.services.CustomerFieldsValidator;
 import com.app.service.customer.services.CustomerService;
 import com.app.service.customer.services.ErrorLogService;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Path;
 import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomerServiceTest {
@@ -63,6 +71,12 @@ public class CustomerServiceTest {
 	ErrorLogService errorLogService;
 	@Mock
 	DBConfig dbConfig;
+	@Mock
+	Validator validator;
+	@Mock
+	ConstraintViolation<CustomerDto> constraint;
+	@Mock
+	BrandRepository brandRepository;
 
 	@Test
 	public void testvalidateListOfCustomers_WithValidData() throws InterruptedException, ExecutionException {
@@ -103,6 +117,7 @@ public class CustomerServiceTest {
 		doReturn(customer).when(customerService).convertcustomerDtoToObj(any());
 		when(customerFieldsValidator.validateCustomerDto(any())).thenReturn(CompletableFuture.completedFuture(errors));
 		assertTrue(customerService.uploadCustomerInfo(inputStream));
+		verify(customerRepository,times(2)).saveAll(any());
 	}
 
 	@Test
@@ -144,6 +159,7 @@ public class CustomerServiceTest {
 	public void testGetCustomer_WithValidData() {
 		when(customerRepository.findById(any())).thenReturn(Optional.of(new Customer()));
 		assertNotNull(customerService.getCustomerInfo(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcb")));
+		verify(customerRepository,times(1)).findById(any());
 	}
 
 	@Test
@@ -175,10 +191,67 @@ public class CustomerServiceTest {
 	}
 
 	@Test
-	public void testUpdateCustomer_WithValidCustomerIdAndNullData() {
+	public void testUpdateCustomer_WithValidCustomerIdAndNullUpdateFields() {
 		when(customerRepository.findById(any())).thenReturn(Optional.of(new Customer()));
 		assertThrows(EmptyDataException.class,
 				() -> customerService.updateCustomer(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcb"), null));
+	}
+
+	@Test
+	public void testUpdateCustomer_WithValidCustomerIdAndData() throws EmptyDataException {
+		Map<String, String> valuesToUpdate = new HashMap<>();
+		Set<ConstraintViolation<CustomerDto>> validationErrors = new HashSet<>();
+		valuesToUpdate.put("email", "dummy@gmail.com");
+		when(customerRepository.findById(any())).thenReturn(Optional.of(new Customer()));
+		when(customerRepository.save(any(Customer.class))).thenReturn(new Customer());
+		when(validator.validate(any(CustomerDto.class))).thenReturn(validationErrors);
+		assertNotNull(customerService.updateCustomer(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcb"),
+				valuesToUpdate));
+		verify(customerRepository,times(1)).save(any());
+	}
+
+	@Test
+	public void testUpdateCustomer_WithValidCustomerIdAndInValidData() throws EmptyDataException {
+		Map<String, String> valuesToUpdate = new HashMap<>();
+		Set<ConstraintViolation<CustomerDto>> validationErrors = new HashSet<>();
+		validationErrors.add(constraint);
+		Path path = new Path() {
+
+			@Override
+			public Iterator<Node> iterator() {
+				return null;
+			}
+		};
+		when(constraint.getPropertyPath()).thenReturn(path);
+		valuesToUpdate.put("email", "dummy@gmail.com");
+		when(customerRepository.findById(any())).thenReturn(Optional.of(new Customer()));
+		when(validator.validate(any(CustomerDto.class))).thenReturn(validationErrors);
+		assertThrows(ValidationException.class, () -> customerService
+				.updateCustomer(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcb"), valuesToUpdate));
+	}
+
+	@Test
+	public void testUpdateCustomer_WithValidCustomerIdAndInValidBrand() throws EmptyDataException {
+		Map<String, String> valuesToUpdate = new HashMap<>();
+		valuesToUpdate.put("brand", "dummy");
+		when(customerRepository.findById(any())).thenReturn(Optional.of(new Customer()));
+		when(brandRepository.fetchByBrandName(any())).thenReturn(null);
+		assertThrows(NoSuchElementException.class, () -> customerService
+				.updateCustomer(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcb"), valuesToUpdate));
+	}
+
+	@Test
+	public void testUpdateCustomer_WithValidCustomerIdAndValidBrand() throws EmptyDataException {
+		Map<String, String> valuesToUpdate = new HashMap<>();
+		valuesToUpdate.put("brand", "dummy");
+		when(customerRepository.findById(any())).thenReturn(Optional.of(new Customer()));
+		when(brandRepository.fetchByBrandName(any()))
+				.thenReturn(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcd"));
+		when(customerRepository.save(any(Customer.class))).thenReturn(new Customer());
+		when(brandRepository.findById(any())).thenReturn(Optional.of(new Brand()));
+		assertNotNull(customerService.updateCustomer(UUID.fromString("d10a7cb3-372f-498c-923b-107b54b60bcb"),
+				valuesToUpdate));
+		verify(customerRepository,times(1)).save(any());
 	}
 
 	private List<CustomerDto> getCustomerDtos() {
@@ -202,17 +275,5 @@ public class CustomerServiceTest {
 		customerDtos.add(customerDto);
 		customerDtos.add(customerDto1);
 		return customerDtos;
-	}
-
-	private CustomerDto getCustomerDto() {
-		CustomerDto customerDto = new CustomerDto();
-		customerDto.setSlNo(1);
-		customerDto.setCustomerName("dummyName");
-		customerDto.setCustomerAlias("dummyAlias");
-		customerDto.setCustomerCode("dummyCode");
-		customerDto.setSupplyGstIn("dummyGSTN");
-		customerDto.setCustomerGstIn("dummyCustGSTN");
-		customerDto.setCustomerType("dummy");
-		return customerDto;
 	}
 }

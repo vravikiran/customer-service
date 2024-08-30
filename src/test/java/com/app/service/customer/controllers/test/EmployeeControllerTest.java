@@ -129,7 +129,7 @@ public class EmployeeControllerTest {
 		String empJson = new ObjectMapper().writeValueAsString(new EmployeeDto());
 		when(employeeService.createEmployee(any())).thenThrow(new ValidationException());
 		mockMvc.perform(post("/employee").accept(MediaType.APPLICATION_JSON).content(empJson)
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().is5xxServerError());
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError());
 	}
 
 	@Test
